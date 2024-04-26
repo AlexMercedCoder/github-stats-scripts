@@ -13,7 +13,44 @@ repo = os.environ.get("REPO_NAME")
 token = os.environ.get("GIT_TOKEN")
 filename = os.environ.get("FILENAME")
 
-getstats2.py
+def get_contributions_by_month(owner, repo, token):
+    # Initialize the result dataframe
+    df = pd.DataFrame(columns=['date', 'total_contributions'])
+    
+    # GitHub API URL for repository commits
+    url = f"https://api.github.com/repos/{owner}/{repo}/stats/commit_activity"
+    
+    # Headers with personal access token
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json',
+        "X-GitHub-Api-Version" : "2022-11-28"
+    }
+    
+    # Make a request to the GitHub API
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code >= 400:
+        print(f"Failed to retrieve data: {response.status_code}")
+        
+    else:
+        data = response.json()
+        new_rows = []
+        
+        for week in data:
+            # Convert UNIX timestamp to date
+            print("week", week)
+            week_end = datetime.utcfromtimestamp(week['week'] + 6 * 86400)
+            month_end = (week_end + MonthEnd(0)).date()
+            
+            # Create a row
+            new_rows.append({'date': month_end, 'total_contributions': week['total']})
+        
+        # Concatenate new rows to the dataframe
+        df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+        df = df.groupby('date')['total_contributions'].sum().reset_index()
+    
+    return df
 
 def save_to_parquet(df, filename):
     df.to_parquet(filename, index=False)
@@ -71,16 +108,13 @@ def get_pull_requests_by_month(owner, repo, token):
 
     return df
 
-def save_to_parquet(df, filename):
-    df.to_parquet(filename, index=False)
-
 # Fetch data
 # pull_requests_df = get_pull_requests_by_month(owner, repo, token)
 
 # Save data to Parquet
 # save_to_parquet(pull_requests_df, filename + "-pullrequests.parquet")
 
-# print("Data saved successfully to", filename)
+print("Data saved successfully to", filename)
 
 def get_contributors_by_month(owner, repo, token):
     # Initialize the result dataframe
@@ -138,4 +172,4 @@ def save_to_parquet(df, filename):
 # Save data to Parquet
 # save_to_parquet(contributors_df, filename + "-contributors.parquet")
 
-# print("Data saved successfully to", filename)
+print("Data saved successfully to", filename)

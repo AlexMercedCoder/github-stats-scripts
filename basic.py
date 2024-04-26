@@ -22,22 +22,24 @@ def get_repo_info(owner, repo, token):
     
     # Make a request to the GitHub API
     response = requests.get(url, headers=headers)
+    print(response.status_code)
     
-    if response.status_code == 200:
+    if response.status_code < 400:
         # Parse the JSON response
         repo_info = response.json()
         
+        print(repo_info)
         # Print basic repository information
-        print("Repository Information:")
-        print(f"Name: {repo_info['name']}")
-        print(f"Owner: {repo_info['owner']['login']}")
-        print(f"Description: {repo_info.get('description', 'No description provided.')}")
-        print(f"Stars: {repo_info['stargazers_count']}")
-        print(f"Forks: {repo_info['forks_count']}")
-        print(f"Open Issues: {repo_info['open_issues_count']}")
-        print(f"Clone URL: {repo_info['clone_url']}")
-        print(f"Created at: {repo_info['created_at']}")
-        print(f"Updated at: {repo_info['updated_at']}")
+        # print("Repository Information:")
+        # print(f"Name: {repo_info['name']}")
+        # print(f"Owner: {repo_info['owner']['login']}")
+        # print(f"Description: {repo_info.get('description', 'No description provided.')}")
+        # print(f"Stars: {repo_info['stargazers_count']}")
+        # print(f"Forks: {repo_info['forks_count']}")
+        # print(f"Open Issues: {repo_info['open_issues_count']}")
+        # print(f"Clone URL: {repo_info['clone_url']}")
+        # print(f"Created at: {repo_info['created_at']}")
+        # print(f"Updated at: {repo_info['updated_at']}")
     else:
         print(f"Failed to retrieve repository information: {response.status_code}")
 
